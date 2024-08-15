@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Map of Hospitals in Kenya</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .b-shadow{
+      box-shadow: 2px 2px 2px 2px white;
+    }
+
+    body {
+      background-color: white;
+      color: #fff;
+    }
+    #map {
+      height: 600px;
+      margin-top: 20px;
+    }
+    .popup-content {
+      font-size: 16px;
+    }
+    .popup-image {
+      max-width: 150px;
+      max-height: 100px;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .navbar {
+      margin-bottom: 20px;
+    }
+    .hospital-card {
+      cursor: pointer;
+      margin-bottom: 15px; /* Space between cards */
+    }
+    .card-container {
+      height: 100vh;
+      overflow-y: auto;
+      padding-right: 15px; /* Add some padding to avoid scrollbar overlap */
+    }
+  </style>
+</head>
+<body class="bg-dark">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+    <a class="navbar-brand" href="#">Major Hospitals in Kenya</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Hospital Cards -->
+      <div class="col-lg-3 card-container">
+        <div class="d-flex flex-column">
+          <!-- Cards will be dynamically added here -->
+        </div>
+      </div>
+      <!-- Map -->
+      <div class="col-lg-9">
+        <div id="map"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([-1.286389, 36.817223], 6);
+
+    // Add a tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Hospital data with images
+    const hospitalData = [
+      {
+        name: "Nairobi Hospital",
+        lat: -1.286389,
+        lon: 36.817223,
+        description: "A major hospital in Nairobi.",
+        image: "nairobi.jpeg"
+      },
+      {
+        name: "Kisumu County Hospital",
+        lat: -0.091703,
+        lon: 34.767956,
+        description: "A prominent hospital in Kisumu.",
+        image: "kisumu.jpeg"
+      },
+      {
+        name: "Moi Teaching and Referral Hospital",
+        lat: 0.516760,
+        lon: 35.281450,
+        description: "A major hospital in Eldoret.",
+        image: "moi.jpeg"
+      },
+      {
+        name: "Aga Khan University Hospital",
+        lat: -1.289235,
+        lon: 36.804933,
+        description: "A renowned hospital in Nairobi.",
+        image: "agakhan.jpeg"
+      },
+      {
+        name: "Kenya Medical Research Institute (KEMRI)",
+        lat: -1.308362,
+        lon: 36.811652,
+        description: "A leading research hospital in Nairobi.",
+        image: "kemri.jpeg"
+      },
+      {
+        name: "Nakuru Level 5 Hospital",
+        lat: -0.303095,
+        lon: 36.066764,
+        description: "A major hospital in Nakuru.",
+        image: "nakuru.jpeg"
+      },
+      {
+        name: "Coast General Hospital",
+        lat: -4.047063,
+        lon: 39.667582,
+        description: "A significant hospital in the coastal region.",
+        image: "coast.jpeg"
+      },
+      {
+        name: "Thika Level 5 Hospital",
+        lat: -1.033919,
+        lon: 37.070301,
+        description: "A well-known hospital in Thika.",
+        image: "thika.jpeg"
+      },
+      {
+        name: "Kericho District Hospital",
+        lat: -0.366845,
+        lon: 35.307552,
+        description: "A key hospital in Kericho.",
+        image: "kericho.jpeg"
+      }
+    ];
+
+    // Add hospital cards
+    const cardContainer = document.querySelector('.d-flex.flex-column');
+    hospitalData.forEach(hospital => {
+      const card = document.createElement('div');
+      card.classList.add('card', 'hospital-card', 'bg-dark', 'b-shadow');
+      card.innerHTML = `
+        <img src="${hospital.image}" class="card-img-top" alt="${hospital.name}">
+        <div class="card-body">
+          <h5 class="card-title">${hospital.name}</h5>
+          <p class="card-text">${hospital.description}</p>
+        </div>
+      `;
+      card.addEventListener('click', () => {
+        map.setView([hospital.lat, hospital.lon], 14);
+        L.popup()
+          .setLatLng([hospital.lat, hospital.lon])
+          .setContent(`
+            <strong>${hospital.name}</strong><br>
+            <img src="${hospital.image}" alt="${hospital.name}" class="popup-image"><br>
+            ${hospital.description}
+          `)
+          .openOn(map);
+      });
+      cardContainer.appendChild(card);
+    });
+
+    // Add markers for hospitals with image popups
+    hospitalData.forEach(hospital => {
+      const marker = L.marker([hospital.lat, hospital.lon]).addTo(map);
+      marker.bindPopup(`
+        <strong>${hospital.name}</strong><br>
+        <img src="${hospital.image}" alt="${hospital.name}" class="popup-image"><br>
+        ${hospital.description}
+      `);
+    });
+  </script>
+</body>
+</html>
